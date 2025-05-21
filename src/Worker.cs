@@ -21,6 +21,8 @@ namespace SpillAlerts
         {
             var client = httpClientFactory.CreateClient();
 
+            logger.LogInformation(JsonSerializer.Serialize(appConfig));
+
             while (!stoppingToken.IsCancellationRequested)
             {
                 if (logger.IsEnabled(LogLevel.Information))
