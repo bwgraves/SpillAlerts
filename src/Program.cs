@@ -17,9 +17,6 @@ namespace SpillAlerts
                 opts.NotificationEmails = builder.Configuration["NOTIFICATION_EMAILS"] ?? string.Empty;
             });
 
-
-            Console.WriteLine($"SMTP_PASSWORD: {builder.Configuration["SMTP_PASSWORD"]}");
-
             var host = builder.Build();
             host.Run();
         }
