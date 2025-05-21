@@ -21,8 +21,6 @@ namespace SpillAlerts
         {
             var client = httpClientFactory.CreateClient();
 
-            SendEmail(["Test Location on startup"]);
-
             while (!stoppingToken.IsCancellationRequested)
             {
                 if (logger.IsEnabled(LogLevel.Information))
