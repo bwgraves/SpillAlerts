@@ -14,7 +14,7 @@ namespace SpillAlerts
 
                 // Digital Ocean doesn't like nested env var overrides, so do this!
                 opts.SmtpPassword = builder.Configuration["SMTP_PASSWORD"] ?? string.Empty;
-                opts.NotificationEmails = builder.Configuration["NOTIFCATION_EMAILS"] ?? string.Empty;
+                opts.NotificationEmails = builder.Configuration["NOTIFICATION_EMAILS"] ?? string.Empty;
             });
 
 
