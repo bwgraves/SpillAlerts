@@ -18,8 +18,16 @@ namespace SpillAlerts
                 opts.NotificationEmails = builder.Configuration["NOTIFICATION_EMAILS"] ?? string.Empty;
             });
 
-            var host = builder.Build();
-            host.Run();
+            try
+            {
+                var host = builder.Build();
+                host.Run();
+            }
+            catch(Exception ex)
+            {
+                Console.Error.WriteLine(ex);
+                Environment.Exit(1);
+            }
         }
     }
 }
