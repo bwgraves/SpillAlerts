@@ -19,8 +19,6 @@ namespace SpillAlerts
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            Console.WriteLine($"Smtp pass from config is", appConfig.Value);
-
             var client = httpClientFactory.CreateClient();
 
             while (!stoppingToken.IsCancellationRequested)
