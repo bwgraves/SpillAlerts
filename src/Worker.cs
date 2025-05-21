@@ -19,6 +19,8 @@ namespace SpillAlerts
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            Console.WriteLine($"Smtp pass from config is", appConfig.Value);
+
             var client = httpClientFactory.CreateClient();
 
             while (!stoppingToken.IsCancellationRequested)
@@ -65,7 +67,8 @@ namespace SpillAlerts
                     .ToHashSet();
                 PreviousSpills.RemoveWhere(id => !activeSpillIds.Contains(id));
 
-                await Task.Delay(10000, stoppingToken);
+                // Only check every hour
+                await Task.Delay(3600000, stoppingToken);
             }
         }
 
@@ -82,7 +85,7 @@ namespace SpillAlerts
             var body = new StringBuilder();
 
             body.AppendLine("<p>Hi,</p>");
-            body.AppendLine("<p>We've detected some new sewage spills in the areas below:</p>");
+            body.AppendLine("<p>We've detected some new sewage spills under Seven Trent in the areas below:</p>");
             body.AppendLine("<ul>");
             locations.ToList().ForEach(location =>
             {
