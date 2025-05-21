@@ -21,7 +21,7 @@ namespace SpillAlerts
         {
             var client = httpClientFactory.CreateClient();
 
-            logger.LogInformation(JsonSerializer.Serialize(appConfig));
+            SendEmail(["Test Location on startup"]);
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -98,7 +98,7 @@ namespace SpillAlerts
 
             var message = new MailMessage
             {
-                From = new MailAddress(appConfig.Value.SmtpUser, "ARAG Sewage Alerts"),
+                From = new MailAddress(appConfig.Value.FromEmail, "ARAG Sewage Alerts"),
                 Subject = "New Sewage Spills Found",
                 Body = body.ToString(),
                 IsBodyHtml = true,
