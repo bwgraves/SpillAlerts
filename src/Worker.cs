@@ -56,6 +56,7 @@ namespace SpillAlerts
 
                 if (firstRun)
                 {
+                    firstRun = false;
                     continue;
                 }
 
