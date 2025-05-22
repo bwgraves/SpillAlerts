@@ -20,6 +20,7 @@ namespace SpillAlerts
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             var client = httpClientFactory.CreateClient();
+            var firstRun = true;
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -34,7 +35,8 @@ namespace SpillAlerts
 
                 var activeSpills = result.Features
                     .Where(s => s.Properties.LatestEventStart != null &&
-                                s.Properties.LatestEventEnd == null)
+                                s.Properties.LatestEventEnd == null &&
+                                s.Properties.ReceivingWaterCourse!.ToLower().EndsWith("river avon"))
                     .ToList();
 
                 var newSpills = activeSpills
@@ -52,6 +54,11 @@ namespace SpillAlerts
                     PreviousSpills.Add(spill.Properties.Id!);
                 }
 
+                if (firstRun)
+                {
+                    continue;
+                }
+
                 var locationNames = await Task.WhenAll(locationNameTasks);
 
                 if (locationNames.Length > 0)
@@ -65,8 +72,8 @@ namespace SpillAlerts
                     .ToHashSet();
                 PreviousSpills.RemoveWhere(id => !activeSpillIds.Contains(id));
 
-                // Only check three hours
-                await Task.Delay(3600000 * 3, stoppingToken);
+                // Only check hour
+                await Task.Delay(3600000, stoppingToken);
             }
         }
 
@@ -91,7 +98,7 @@ namespace SpillAlerts
             });
             body.AppendLine("</ul>");
             body.AppendLine("<p>If you think anything looks incorrect, please reply to this email.</p>");
-            body.AppendLine("<p>Kind Regards<br />");
+            body.AppendLine("<p>Kind Regards,<br />");
             body.AppendLine("ARAG Sewage Alerts</p>");
 
             var message = new MailMessage
