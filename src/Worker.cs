@@ -72,8 +72,8 @@ namespace SpillAlerts
                     .ToHashSet();
                 PreviousSpills.RemoveWhere(id => !activeSpillIds.Contains(id));
 
-                // Only check hour
-                await Task.Delay(3600000, stoppingToken);
+                // Check every 20 minutes
+                await Task.Delay(1200000, stoppingToken);
             }
         }
 
@@ -97,9 +97,11 @@ namespace SpillAlerts
                 body.AppendLine($"<li>{location}</li>");
             });
             body.AppendLine("</ul>");
-            body.AppendLine("<p>If you think anything looks incorrect, please reply to this email.</p>");
+            body.AppendLine("<p>The details of these and future spills can be monitored further at <a href="https://sewagemap.co.uk">https://sewagemap.co.uk</a>.");
+            body.AppendLine("If you think anything looks incorrect, please reply to this email with any details.</p>");
             body.AppendLine("<p>Kind Regards,<br />");
             body.AppendLine("ARAG Sewage Alerts</p>");
+            body.AppendLine("<p>P.S. If you wish to opt-out of these alerts, please reply with 'optout' and you'll be taken off the list.</p>")
 
             var message = new MailMessage
             {
