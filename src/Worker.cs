@@ -20,6 +20,7 @@ namespace SpillAlerts
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             var client = httpClientFactory.CreateClient();
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("Avon Sewage Alerts (alerts@bernielabs.com)");
             var firstRun = true;
 
             while (!stoppingToken.IsCancellationRequested)
@@ -91,7 +92,7 @@ namespace SpillAlerts
             var body = new StringBuilder();
 
             body.AppendLine("<p>Hi,</p>");
-            body.AppendLine("<p>We've detected some new sewage spills under Seven Trent in the areas below:</p>");
+            body.AppendLine("<p>We've detected some new sewage spills into the Warwickshire Avon under Seven Trent in the areas below:</p>");
             body.AppendLine("<ul>");
             locations.ToList().ForEach(location =>
             {
@@ -123,7 +124,16 @@ namespace SpillAlerts
                 Credentials = new NetworkCredential(appConfig.Value.SmtpUser, appConfig.Value.SmtpPassword)
             };
 
-            smtp.Send(message);
+            try
+            {
+                logger.LogInformation("Sending notification email");
+                smtp.Send(message);
+            }
+            catch (Exception ex)
+            {
+                var locationsInfo = string.Join(',', locations);
+                logger.LogError(ex, "Failed to send notification email. Locations where: {Locations}", locationsInfo);
+            }
         }
 
         /// <summary>
@@ -131,15 +141,13 @@ namespace SpillAlerts
         /// </summary>
         private static async Task<string> GetLocationName(HttpClient client, double lat, double lon)
         {
-            client.DefaultRequestHeaders.UserAgent.ParseAdd("MyApp/1.0");
-
             var url = $"https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lon}&format=json";
-            var response = await client.GetStringAsync(url);
-            var result = JsonDocument.Parse(response);
+                var response = await client.GetStringAsync(url);
+                var result = JsonDocument.Parse(response);
 
-            return result.RootElement
-                .GetProperty("display_name")
-                .GetString()!;
-        }
+                return result.RootElement
+                    .GetProperty("display_name")
+                    .GetString()!;
+            }
     }
 }
