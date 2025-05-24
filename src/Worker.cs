@@ -74,8 +74,8 @@ namespace SpillAlerts
                     .ToHashSet();
                 PreviousSpills.RemoveWhere(id => !activeSpillIds.Contains(id));
 
-                // Check every 20 minutes
-                await Task.Delay(1200000, stoppingToken);
+                // Check every 5 minutes
+                await Task.Delay(300000, stoppingToken);
             }
         }
 
