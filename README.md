@@ -6,5 +6,6 @@ This is a simple background worker that checks for recent sewage spill reports o
 ## Todo
 - [ ] Include sewage spill start time  
 - [x] Only alert Warwickshire Avon spills  
-- [ ] Add opt-out footnote to email  
+- [x] Add opt-out footnote to email  
 - [x] Don't resend emails on redeploy — assume that unless the spill was in the last 5 minutes, we've already sent the alert
+- [ ] Telegram Integration
