@@ -142,12 +142,12 @@ namespace SpillAlerts
         private static async Task<string> GetLocationName(HttpClient client, double lat, double lon)
         {
             var url = $"https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lon}&format=json";
-                var response = await client.GetStringAsync(url);
-                var result = JsonDocument.Parse(response);
+            var response = await client.GetStringAsync(url);
+            var result = JsonDocument.Parse(response);
 
-                return result.RootElement
-                    .GetProperty("display_name")
-                    .GetString()!;
-            }
+            return result.RootElement
+                .GetProperty("display_name")
+                .GetString()!;
+        }
     }
 }
