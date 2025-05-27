@@ -47,7 +47,8 @@ namespace SpillAlerts
             "seeley brook",
             "sherbourne brook",
             "shottery brook",
-            "whitson brook"
+            "whitson brook",
+            "river swift"
         ];
 
         private HashSet<string> PreviousSpills { get; set; } = [];
@@ -131,7 +132,7 @@ namespace SpillAlerts
             body.AppendLine("<ul>");
             locations.ToList().ForEach(location =>
             {
-                body.AppendLine($"<li>{location}</li>");
+                body.AppendLine($"<li><a href=\"\">{location}</a></li>");
             });
             body.AppendLine("</ul>");
             body.AppendLine("<p>The details of these and future spills can be monitored further at <a href=\"https://sewagemap.co.uk\">https://sewagemap.co.uk</a>.");
