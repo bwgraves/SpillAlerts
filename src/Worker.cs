@@ -15,6 +15,41 @@ namespace SpillAlerts
         IHttpClientFactory httpClientFactory,
         IOptions<AppConfiguration> appConfig) : BackgroundService
     {
+        private readonly HashSet<string> receivingWaterCourses =
+        [
+            "river avon",
+            "badsey brook",
+            "ban brook",
+            "bell brook",
+            "bow brook",
+            "broadway brook",
+            "canley brook",
+            "carrant brook",
+            "cattle brook",
+            "fishers brook",
+            "hammock brook",
+            "harvington brook",
+            "kemerton brook",
+            "lenchwick stream",
+            "littleton brook",
+            "mill avon",
+            "piddle brook",
+            "pingle brook",
+            "princethorpe brook",
+            "river alne",
+            "river arrow",
+            "river dene",
+            "river isbourne",
+            "river itchen",
+            "river leam",
+            "river sowe",
+            "rush brook",
+            "seeley brook",
+            "sherbourne brook",
+            "shottery brook",
+            "whitson brook"
+        ];
+
         private HashSet<string> PreviousSpills { get; set; } = [];
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -37,7 +72,7 @@ namespace SpillAlerts
                 var activeSpills = result.Features
                     .Where(s => s.Properties.LatestEventStart != null &&
                                 s.Properties.LatestEventEnd == null &&
-                                s.Properties.ReceivingWaterCourse!.ToLower().EndsWith("river avon"))
+                                receivingWaterCourses.Any(w => w.Contains(s.Properties.ReceivingWaterCourse!.ToLower())))
                     .ToList();
 
                 var newSpills = activeSpills
