@@ -80,14 +80,23 @@ namespace SpillAlerts
                     .Where(s => !PreviousSpills.Contains(s.Properties.Id!))
                     .ToList();
 
-                var locationNameTasks = new List<Task<string>>();
+                var locationTasks = new List<Task<LocationDto>>();
 
                 foreach (var spill in newSpills)
                 {
                     var lon = spill.Geometry.Coordinates![1];
                     var lat = spill.Geometry.Coordinates![0];
 
-                    locationNameTasks.Add(GetLocationName(client, lon, lat));
+                    locationTasks.Add(Task.Run(async () =>
+                    {
+                        var name = await GetLocationName(client, lon, lat);
+                        return new LocationDto
+                        {
+                            Name = name,
+                            Code = spill.Properties.Id!
+                        };
+                    }));
+
                     PreviousSpills.Add(spill.Properties.Id!);
                 }
 
@@ -97,11 +106,11 @@ namespace SpillAlerts
                     continue;
                 }
 
-                var locationNames = await Task.WhenAll(locationNameTasks);
+                var locations = await Task.WhenAll(locationTasks);
 
-                if (locationNames.Length > 0)
+                if (locations.Length > 0)
                 {
-                    SendEmail(locationNames);
+                    SendEmail(locations);
                 }
 
                 // Remove spills that are no longer active
@@ -118,7 +127,7 @@ namespace SpillAlerts
         /// <summary>
         /// Send an email to the configured addresses with the new sewage spill locations.
         /// </summary>
-        private void SendEmail(string[] locations)
+        private void SendEmail(LocationDto[] locations)
         {
             var emails = appConfig.Value.NotificationEmails
                 .Split(',')
@@ -132,7 +141,7 @@ namespace SpillAlerts
             body.AppendLine("<ul>");
             locations.ToList().ForEach(location =>
             {
-                body.AppendLine($"<li>{location}</li>");
+                body.AppendLine($"<li>{location.Name} - <a href=\"{location.MapUrl}\">({location.Code})</a></li>");
             });
             body.AppendLine("</ul>");
             body.AppendLine("<p>The details of these and future spills can be monitored further at <a href=\"https://sewagemap.co.uk\">https://sewagemap.co.uk</a>.");
@@ -167,7 +176,7 @@ namespace SpillAlerts
             }
             catch (Exception ex)
             {
-                var locationsInfo = string.Join(',', locations);
+                var locationsInfo = string.Join(',', locations.Select(l => l.Name));
                 logger.LogError(ex, "Failed to send notification email. Locations where: {Locations}", locationsInfo);
             }
         }
@@ -184,6 +193,13 @@ namespace SpillAlerts
             return result.RootElement
                 .GetProperty("display_name")
                 .GetString()!;
+        }
+
+        private class LocationDto
+        {
+            public required string Name { get; set; }
+            public required string Code { get; set; }
+            public string MapUrl => $"https://www.sewagemap.co.uk/?asset_id={Code}&company=Severn%20Trent%20Water";
         }
     }
 }
