@@ -66,6 +66,10 @@ namespace SpillAlerts
                     logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
                 }
 
+                // stop everything until fix is in for multiple emails
+                await Task.Delay(60000);
+                continue;
+
                 var response = await client.GetAsync(appConfig.Value.OverflowDataEndpoint);
                 var json = await response.Content.ReadAsStringAsync();
                 var result = JsonSerializer.Deserialize<OverFlowActivityResponse>(json) ?? new OverFlowActivityResponse();
