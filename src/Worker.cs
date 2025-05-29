@@ -73,7 +73,7 @@ namespace SpillAlerts
                 var activeSpills = result.Features
                     .Where(s => s.Properties.LatestEventStart != null &&
                                 s.Properties.LatestEventEnd == null &&
-                                receivingWaterCourses.Any(w => w.Contains(s.Properties.ReceivingWaterCourse!.ToLower())))
+                                receivingWaterCourses.Any(w => s.Properties.ReceivingWaterCourse.ToLower().EndsWith(w.ToLower())))
                     .ToList();
 
                 var newSpills = activeSpills
