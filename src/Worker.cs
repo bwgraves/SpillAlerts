@@ -42,7 +42,7 @@ namespace SpillAlerts
             "river isbourne",
             "river itchen",
             "river leam",
-            //"river sowe",
+            "river sowe",
             "rush brook",
             "seeley brook",
             "sherbourne brook",
@@ -66,10 +66,6 @@ namespace SpillAlerts
                     logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
                 }
 
-                // stop everything until fix is in for multiple emails
-                await Task.Delay(60000);
-                continue;
-
                 var response = await client.GetAsync(appConfig.Value.OverflowDataEndpoint);
                 var json = await response.Content.ReadAsStringAsync();
                 var result = JsonSerializer.Deserialize<OverFlowActivityResponse>(json) ?? new OverFlowActivityResponse();
@@ -77,7 +73,7 @@ namespace SpillAlerts
                 var activeSpills = result.Features
                     .Where(s => s.Properties.LatestEventStart != null &&
                                 s.Properties.LatestEventEnd == null &&
-                                receivingWaterCourses.Any(w => s.Properties.ReceivingWaterCourse.ToLower().EndsWith(w.ToLower())))
+                                receivingWaterCourses.Any(w => s.Properties.ReceivingWaterCourse!.ToLower().EndsWith(w.ToLower())))
                     .ToList();
 
                 var newSpills = activeSpills
@@ -97,7 +93,8 @@ namespace SpillAlerts
                         return new LocationDto
                         {
                             Name = name,
-                            Code = spill.Properties.Id!
+                            Code = spill.Properties.Id!,
+                            StartTime = DateTimeOffset.FromUnixTimeMilliseconds(spill.Properties.StatusStart).UtcDateTime
                         };
                     }));
 
@@ -145,7 +142,7 @@ namespace SpillAlerts
             body.AppendLine("<ul>");
             locations.ToList().ForEach(location =>
             {
-                body.AppendLine($"<li>{location.Name} - <a href=\"{location.MapUrl}\">({location.Code})</a></li>");
+                body.AppendLine($"<li>{location.Name} - started at {location.StartTime:g} (<a href=\"{location.MapUrl}\">{location.Code}</a>)</li>");
             });
             body.AppendLine("</ul>");
             body.AppendLine("<p>The details of these and future spills can be monitored further at <a href=\"https://sewagemap.co.uk\">https://sewagemap.co.uk</a>.");
@@ -204,6 +201,7 @@ namespace SpillAlerts
             public required string Name { get; set; }
             public required string Code { get; set; }
             public string MapUrl => $"https://www.sewagemap.co.uk/?asset_id={Code}&company=Severn%20Trent%20Water";
+            public DateTime StartTime { get; set; }
         }
     }
 }
