@@ -51,7 +51,7 @@ namespace SpillAlerts
             "river swift"
         ];
 
-        private HashSet<string> PreviousSpills { get; set; } = [];
+        private Dictionary<string, SpillMemory> PreviousSpills { get; set; } = [];
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -76,8 +76,21 @@ namespace SpillAlerts
                                 receivingWaterCourses.Any(w => s.Properties.ReceivingWaterCourse!.ToLower().EndsWith(w.ToLower())))
                     .ToList();
 
+                // Save all instances of a spill which started at a certain time, so we don't alert again
+                // for what is probably the same spill.
+                foreach (var spill in activeSpills)
+                {
+                    PreviousSpills[spill.Properties.Id!] = new SpillMemory
+                    {
+                        StatusStart = spill.Properties.StatusStart,
+                        LastSeen = DateTimeOffset.UtcNow
+                    };
+                }
+
                 var newSpills = activeSpills
-                    .Where(s => !PreviousSpills.Contains(s.Properties.Id!))
+                    .Where(s =>
+                        !PreviousSpills.TryGetValue(s.Properties.Id!, out var memory) ||
+                        memory.StatusStart != s.Properties.StatusStart)
                     .ToList();
 
                 var locationTasks = new List<Task<LocationDto>>();
@@ -97,8 +110,6 @@ namespace SpillAlerts
                             StartTime = DateTimeOffset.FromUnixTimeMilliseconds(spill.Properties.StatusStart).UtcDateTime
                         };
                     }));
-
-                    PreviousSpills.Add(spill.Properties.Id!);
                 }
 
                 if (firstRun)
@@ -114,11 +125,11 @@ namespace SpillAlerts
                     SendEmail(locations);
                 }
 
-                // Remove spills that are no longer active
-                var activeSpillIds = activeSpills
-                    .Select(s => s.Properties.Id!)
-                    .ToHashSet();
-                PreviousSpills.RemoveWhere(id => !activeSpillIds.Contains(id));
+                // Clearup any saved spills that haven't been seen in the last 12 hours
+                var expiry = DateTimeOffset.UtcNow.AddHours(-12);
+                PreviousSpills = PreviousSpills
+                    .Where(kvp => kvp.Value.LastSeen > expiry)
+                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
                 // Check every 5 minutes
                 await Task.Delay(300000, stoppingToken);
@@ -202,6 +213,12 @@ namespace SpillAlerts
             public required string Code { get; set; }
             public string MapUrl => $"https://www.sewagemap.co.uk/?asset_id={Code}&company=Severn%20Trent%20Water";
             public DateTime StartTime { get; set; }
+        }
+
+        private class SpillMemory
+        {
+            public long StatusStart { get; set; }
+            public DateTimeOffset LastSeen { get; set; }
         }
     }
 }
