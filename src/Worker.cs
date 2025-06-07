@@ -100,7 +100,7 @@ namespace SpillAlerts
 
                 foreach (var spill in newSpills)
                 {
-                    logger.LogInformation("New spill! ID: {Id}", spill.Id)
+                    logger.LogInformation("New spill! ID: {Id}", spill.Id);
 
                     var lon = spill.Geometry.Coordinates![1];
                     var lat = spill.Geometry.Coordinates![0];
@@ -119,7 +119,7 @@ namespace SpillAlerts
 
                 if (firstRun)
                 {
-                    logger.LogInformation("Ignoring any active spills on first run")
+                    logger.LogInformation("Ignoring any active spills on first run");
                     firstRun = false;
                     continue;
                 }
@@ -128,7 +128,7 @@ namespace SpillAlerts
 
                 if (locations.Length > 0)
                 {
-                    logger.LogInformation("Sending notification email")
+                    logger.LogInformation("Sending notification email");
                     SendEmail(locations);
                 }
 
