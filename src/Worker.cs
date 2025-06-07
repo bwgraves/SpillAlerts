@@ -57,7 +57,7 @@ namespace SpillAlerts
         {
             var client = httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.UserAgent.ParseAdd("Avon Sewage Alerts (alerts@bernielabs.com)");
-            var firstRun = true;
+            var firstRun = false;
 
             while (!stoppingToken.IsCancellationRequested)
             {
