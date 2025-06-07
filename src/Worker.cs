@@ -77,6 +77,12 @@ namespace SpillAlerts
                                     s.Properties.ReceivingWaterCourse.ToLower().EndsWith(w.ToLower())))
                     .ToList();
 
+                var newSpills = activeSpills
+                    .Where(s =>
+                        !PreviousSpills.TryGetValue(s.Properties.Id!, out var memory) ||
+                        memory.StatusStart != s.Properties.StatusStart)
+                    .ToList();
+
                 // Save all instances of a spill which started at a certain time, so we don't alert again
                 // for what is probably the same spill.
                 foreach (var spill in activeSpills)
@@ -87,12 +93,6 @@ namespace SpillAlerts
                         LastSeen = DateTimeOffset.UtcNow
                     };
                 }
-
-                var newSpills = activeSpills
-                    .Where(s =>
-                        !PreviousSpills.TryGetValue(s.Properties.Id!, out var memory) ||
-                        memory.StatusStart != s.Properties.StatusStart)
-                    .ToList();
 
                 var locationTasks = new List<Task<LocationDto>>();
 
