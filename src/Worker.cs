@@ -77,6 +77,8 @@ namespace SpillAlerts
                                     s.Properties.ReceivingWaterCourse.ToLower().EndsWith(w.ToLower())))
                     .ToList();
 
+                logger.LogInformation("active spills: {ActiveSpills}", JsonSerializer.Serialize(activeSpills));
+
                 var newSpills = activeSpills
                     .Where(s =>
                         !PreviousSpills.TryGetValue(s.Properties.Id!, out var memory) ||
@@ -98,6 +100,8 @@ namespace SpillAlerts
 
                 foreach (var spill in newSpills)
                 {
+                    logger.LogInformation("New spill! ID: {Id}", spill.Id)
+
                     var lon = spill.Geometry.Coordinates![1];
                     var lat = spill.Geometry.Coordinates![0];
 
@@ -115,6 +119,7 @@ namespace SpillAlerts
 
                 if (firstRun)
                 {
+                    logger.LogInformation("Ignoring any active spills on first run")
                     firstRun = false;
                     continue;
                 }
@@ -123,6 +128,7 @@ namespace SpillAlerts
 
                 if (locations.Length > 0)
                 {
+                    logger.LogInformation("Sending notification email")
                     SendEmail(locations);
                 }
 
@@ -131,6 +137,8 @@ namespace SpillAlerts
                 PreviousSpills = PreviousSpills
                     .Where(kvp => kvp.Value.LastSeen > expiry)
                     .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+                logger.LogInformation("Spills in memory: {Spills}", JsonSerializer.Serialize(PreviousSpills));
 
                 // Check every 5 minutes
                 await Task.Delay(300000, stoppingToken);
