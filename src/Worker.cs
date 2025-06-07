@@ -157,16 +157,12 @@ namespace SpillAlerts
 
             var body = new StringBuilder();
 
-            var startTime = TimeZoneInfo.ConvertTimeFromUtc(location.StartTime,
-                TimeZoneInfo.FindSystemTimeZoneById(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "GMT Standard Time" : "Europe/London"))
-                .ToString("dd/MM/yyyy HH:mm");
-
             body.AppendLine("<p>Hi,</p>");
             body.AppendLine("<p>We've detected some new sewage spills into the Warwickshire Avon under Seven Trent in the areas below:</p>");
             body.AppendLine("<ul>");
             locations.ToList().ForEach(location =>
             {
-                body.AppendLine($"<li>{location.Name} - started at {startTime} UTC (<a href=\"{location.MapUrl}\">{location.Code}</a>)</li>");
+                body.AppendLine($"<li>{location.Name} - started at {location.StartTime.ToString("dd/MM/yyyy HH:mm")} UTC (<a href=\"{location.MapUrl}\">{location.Code}</a>)</li>");
             });
             body.AppendLine("</ul>");
             body.AppendLine("<p>The details of these and future spills can be monitored further at <a href=\"https://sewagemap.co.uk\">https://sewagemap.co.uk</a>.");
