@@ -4,6 +4,7 @@
 This is a simple background worker that checks for recent sewage spill reports on the Warwickshire Avon (currently set up for Severn Trent only) and sends email notifications to a list of configured recipients whenever new spill locations pop up.
 
 ## Todo
+- [ ] Unit tests!
 - [x] Include sewage spill start time  
 - [x] Only alert Warwickshire Avon spills  
 - [x] Add opt-out footnote to email  
