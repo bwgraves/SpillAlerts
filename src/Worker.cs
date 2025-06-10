@@ -128,7 +128,6 @@ namespace SpillAlerts
 
                 if (locations.Length > 0)
                 {
-                    logger.LogInformation("Sending notification email");
                     SendEmail(locations);
                 }
 
@@ -165,8 +164,7 @@ namespace SpillAlerts
                 body.AppendLine($"<li>{location.Name} - started at {location.StartTime.ToString("dd/MM/yyyy HH:mm")} UTC (<a href=\"{location.MapUrl}\">{location.Code}</a>)</li>");
             });
             body.AppendLine("</ul>");
-            body.AppendLine("<p>The details of these and future spills can be monitored further at <a href=\"https://sewagemap.co.uk\">https://sewagemap.co.uk</a>.");
-            body.AppendLine("If you think anything looks incorrect, please reply to this email with any details.</p>");
+            body.AppendLine("<p>The details of these and future spills can be monitored further at <a href=\"https://sewagemap.co.uk\">https://sewagemap.co.uk</a>. Got feedback? Let us know via a <a href=\"https://www.smartsurvey.co.uk/s/spillalerts\">short survey.</a>");
             body.AppendLine("<p>Kind Regards,<br />");
             body.AppendLine("ARAG Sewage Alerts</p>");
             body.AppendLine("<p>P.S. If you wish to opt-out of these alerts, please reply with \"optout\" and you'll be taken off the list.</p>");
