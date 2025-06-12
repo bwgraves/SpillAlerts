@@ -12,3 +12,8 @@ This is a simple background worker that checks for recent sewage spill reports o
 - [ ] Telegram Integration
 - [ ] Automatically opt-user in from smartsurvey form
 - [x] Grace period
+- [ ] Pull in rain water data to see if it's a dry spill
+
+## Cool to have
+- [ ] Styled emails
+- [ ] Include map on email
