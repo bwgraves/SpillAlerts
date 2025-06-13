@@ -3,7 +3,7 @@ using SpillAlerts.Models;
 using System.Net.Mail;
 using System.Net;
 using System.Text.Json;
-using System.Text;
+using HandlebarsDotNet;
 
 namespace SpillAlerts
 {
@@ -126,9 +126,9 @@ namespace SpillAlerts
 
                 var locations = await Task.WhenAll(locationTasks);
 
-                if (locations.Length > 0)
+                foreach(var location in locations)
                 {
-                    SendEmail(locations);
+                    SendEmail(location);
                 }
 
                 // Clearup any saved spills that haven't been seen in the last 12 hours
@@ -147,33 +147,31 @@ namespace SpillAlerts
         /// <summary>
         /// Send an email to the configured addresses with the new sewage spill locations.
         /// </summary>
-        private void SendEmail(LocationDto[] locations)
+        private void SendEmail(LocationDto location)
         {
             var emails = appConfig.Value.NotificationEmails
                 .Split(',')
                 .Select(email => email.Trim())
                 .ToList();
 
-            var body = new StringBuilder();
+            var templateSource = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "EmailTemplate.handlebars"));
+            var template = Handlebars.Compile(templateSource);
 
-            body.AppendLine("<p>Hi,</p>");
-            body.AppendLine("<p>We've detected some new sewage spills into the Warwickshire Avon under Seven Trent in the areas below:</p>");
-            body.AppendLine("<ul>");
-            locations.ToList().ForEach(location =>
+            var data = new Dictionary<string, string> 
             {
-                body.AppendLine($"<li>{location.Name} - started at {location.StartTime.ToString("dd/MM/yyyy HH:mm")} UTC (<a href=\"{location.MapUrl}\">{location.Code}</a>)</li>");
-            });
-            body.AppendLine("</ul>");
-            body.AppendLine("<p>The details of these and future spills can be monitored further at <a href=\"https://sewagemap.co.uk\">https://sewagemap.co.uk</a>. Got feedback? Let us know via a <a href=\"https://www.smartsurvey.co.uk/s/spillalerts\">short survey.</a>");
-            body.AppendLine("<p>Kind Regards,<br />");
-            body.AppendLine("ARAG Sewage Alerts</p>");
-            body.AppendLine("<p>P.S. If you wish to opt-out of these alerts, please reply with \"optout\" and you'll be taken off the list.</p>");
+                { "location", location.Name },
+                { "mapUrl", location.MapUrl },
+                { "locationCode", location.Code },
+                { "startTime", location.StartTime.ToString("dd/MM/yyyy 'at' HH:mm") },
+            };
+
+            var body = template(data);
 
             var message = new MailMessage
             {
                 From = new MailAddress(appConfig.Value.FromEmail, "ARAG Sewage Alerts"),
                 Subject = "New Sewage Spills Found",
-                Body = body.ToString(),
+                Body = body,
                 IsBodyHtml = true,
             };
 
@@ -195,8 +193,7 @@ namespace SpillAlerts
             }
             catch (Exception ex)
             {
-                var locationsInfo = string.Join(',', locations.Select(l => l.Name));
-                logger.LogError(ex, "Failed to send notification email. Locations where: {Locations}", locationsInfo);
+                logger.LogError(ex, "Failed to send notification email. Location: {Location}", location.Name);
             }
         }
 
