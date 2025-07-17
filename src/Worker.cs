@@ -96,25 +96,25 @@ namespace SpillAlerts
                     };
                 }
 
-                var locationTasks = new List<Task<LocationDto>>();
+                var locations = new List<LocationDto>();
 
                 foreach (var spill in newSpills)
                 {
                     logger.LogInformation("New spill! ID: {Id}", spill.Id);
 
-                    var lon = spill.Geometry.Coordinates![1];
-                    var lat = spill.Geometry.Coordinates![0];
+                    var lon = spill.Geometry.Coordinates![0];
+                    var lat = spill.Geometry.Coordinates![1];
 
-                    locationTasks.Add(Task.Run(async () =>
+                    var details = SiteHelper.GetDetails(spill.Properties.Id!);
+                    locations.Add(new LocationDto
                     {
-                        var name = await GetLocationName(client, lon, lat);
-                        return new LocationDto
-                        {
-                            Name = name,
-                            Code = spill.Properties.Id!,
-                            StartTime = DateTimeOffset.FromUnixTimeMilliseconds(spill.Properties.StatusStart).UtcDateTime
-                        };
-                    }));
+                        Name = details?.Name ?? "Unknown Site",
+                        Code = spill.Properties.Id!,
+                        StartTime = DateTimeOffset.FromUnixTimeMilliseconds(spill.Properties.StatusStart).UtcDateTime,
+                        Latitude = lat,
+                        Longitude = lon,
+                        StationType = details.StormDischargeAssetType
+                    });
                 }
 
                 if (firstRun)
@@ -123,8 +123,6 @@ namespace SpillAlerts
                     firstRun = false;
                     continue;
                 }
-
-                var locations = await Task.WhenAll(locationTasks);
 
                 foreach(var location in locations)
                 {
@@ -163,6 +161,9 @@ namespace SpillAlerts
                 { "mapUrl", location.MapUrl },
                 { "locationCode", location.Code },
                 { "startTime", location.StartTime.ToString("dd/MM/yyyy 'at' HH:mm") },
+                { "stationType", location.StationType! },
+                { "lat", location.Latitude.ToString() },
+                { "long", location.Longitude.ToString() },
             };
 
             var body = template(data);
@@ -217,6 +218,9 @@ namespace SpillAlerts
             public required string Code { get; set; }
             public string MapUrl => $"https://www.sewagemap.co.uk/?asset_id={Code}&company=Severn%20Trent%20Water";
             public DateTime StartTime { get; set; }
+            public string? StationType { get; set; }
+            public double Latitude { get; set; }
+            public double Longitude { get; set; }
         }
 
         private class SpillMemory

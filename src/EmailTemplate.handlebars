@@ -234,11 +234,17 @@
                                             <p>Hi,</p>
                                             <p>We've detected a new spill into the Warwickshire Avon under Severn Trent.</p>
 
-                                            <p class="mb0"><strong>Location</strong></p>
+                                            <p class="mb0"><strong>Site</strong></p>
                                             <p>{{ location }} (<a href="{{ mapUrl }}">{{ locationCode }}</a>).</p>
 
                                             <p class="mb0"><strong>Start Time</strong></p>
                                             <p>{{ startTime }} UTC</p>
+
+                                            <p class="mb0"><strong>Storm Discharge Asset Type</strong></p>
+                                            <p>{{ stationType }}</p>
+
+                                            <p class="mb0"><strong>Location</strong></p>
+                                            <p>{{ lat }}, {{ long }} - <a href="https://www.google.com/maps/@{{ lat }},{{ long }},15z">See on Google Maps</a></p>
 
                                             <p>The details of these and future spills can be monitored further at <a href="https://sewagemap.co.uk">https://sewagemap.co.uk</a>.</p>
 
