@@ -14,6 +14,8 @@ This is a simple background worker that checks for recent sewage spill reports o
 - [x] Grace period
 - [ ] Pull in rain water data to see if it's a dry spill
 - [x] Add the size/type of station
+- [ ] Batch the alerts?
+- [ ] Pull address back in
 
 ## Cool to have
 - [ ] Styled emails
