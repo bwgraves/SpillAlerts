@@ -113,7 +113,8 @@ namespace SpillAlerts
                         StartTime = DateTimeOffset.FromUnixTimeMilliseconds(spill.Properties.StatusStart).UtcDateTime,
                         Latitude = lat,
                         Longitude = lon,
-                        StationType = details.StormDischargeAssetType
+                        StationType = details.StormDischargeAssetType,
+                        ReceivingWaterCourse = spill.Properties.ReceivingWaterCourse
                     });
                 }
 
@@ -164,6 +165,7 @@ namespace SpillAlerts
                 { "stationType", location.StationType! },
                 { "lat", location.Latitude.ToString() },
                 { "long", location.Longitude.ToString() },
+                { "recievingWaterCourse", location.ReceivingWaterCourse! },
             };
 
             var body = template(data);
@@ -221,6 +223,7 @@ namespace SpillAlerts
             public string? StationType { get; set; }
             public double Latitude { get; set; }
             public double Longitude { get; set; }
+            public string? ReceivingWaterCourse { get; set; }
         }
 
         private class SpillMemory
