@@ -165,7 +165,7 @@ namespace SpillAlerts
                 { "stationType", location.StationType! },
                 { "lat", location.Latitude.ToString() },
                 { "long", location.Longitude.ToString() },
-                { "recievingWaterCourse", location.ReceivingWaterCourse! },
+                { "receivingWaterCourse", location.ReceivingWaterCourse! },
             };
 
             var body = template(data);
